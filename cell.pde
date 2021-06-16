@@ -4,6 +4,7 @@ class Cell {
   PVector acceleration;
   
   float maxspeed;    // Maximum speed
+  float size;
     
   Cell(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -17,19 +18,19 @@ class Cell {
 
     position = new PVector(x, y);
     maxspeed = 2;
+    size = random(50,200);
   }
 
   void run(ArrayList<Cell> cells) {
     flock(cells);
     update();
-    render();
   }
 
   void flock(ArrayList<Cell> cells) {
     PVector sep = separate(cells);   // Separation
     //PVector coh = cohesion(cells);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(1.5);
+    sep.mult(1);
     //coh.mult(1.0);
     // Add the force vectors to acceleration
     applyForce(sep);
@@ -37,7 +38,7 @@ class Cell {
   }
   
   PVector separate(final ArrayList<Cell> cells) {
-    float desiredseparation = 200.0f;
+    float desiredseparation = size;//200.0f;
 
     ArrayList<Cell> walls = new ArrayList<Cell>();
 
@@ -57,13 +58,11 @@ class Cell {
     }
     
         
-    // Floor
+    // Floor and ceiling
     walls.add(new Cell(position.x, height));
-    // Ceiling
     walls.add(new Cell(position.x, 0));
-    // Left wall
+    // Left and right walls
     walls.add(new Cell(0, position.y));
-    // Right
     walls.add(new Cell(width, position.y));
     
     for (Cell other : walls) {
@@ -73,7 +72,7 @@ class Cell {
       // Calculate vector pointing away from neighbor
       PVector diff = PVector.sub(position, other.position);
       diff.normalize();
-      diff.div(d/30);        // Weight by distance
+      diff.div(d/5);        // Weight by distance
       force.add(diff);
       //count++;            // Keep track of how many
      // }
@@ -87,7 +86,9 @@ class Cell {
     velocity.add(acceleration);
     // Limit speed
     velocity.limit(maxspeed);
-    velocity.mult(0.95);
+    
+    velocity.mult(0.9); // Environment tends to stillness
+    
     position.add(velocity);
     
     if (position.x < 0) position.x = 5;
@@ -102,7 +103,13 @@ class Cell {
     circle(position.x, position.y, 5);
   }
   
-  void push() {
+  void pull(PVector target, float mag) {
+    // Attract cell to target with force of magnitude mag
+    PVector direction = PVector.sub(target, position);
+    direction.normalize();
+    direction.mult(mag);
+    direction.div(PVector.dist(position, target));
+    applyForce(direction);
     
   }
 
