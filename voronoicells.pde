@@ -6,7 +6,7 @@ float pullmag = 100;
 int ncells = 200;
 
 Voronoi vor;
-float[][] vorpoints = new float[ncells][2];
+float[][] vorpoints;
 
 void setup() {
   size(500, 500);
@@ -33,10 +33,17 @@ void draw() {
   } else {
     pull = false;
   }
+  //if(pull) {
+  //    cells.get(0).pull(new PVector(mouseX, mouseY), pullmag);
+  //  }
   if(pull) {
-      cells.get(0).pull(new PVector(mouseX, mouseY), pullmag);
-    }
+    if (frameCount%5==0){
+      ncells += 1;
+    cells.add(new Cell(mouseX, mouseY));
     
+    }
+    //C.pull(new PVector(mouseX, mouseY), pullmag);
+  }
   voronoi();
     
     
@@ -44,12 +51,15 @@ void draw() {
     C.run(cells);
     
     C.render();
+    
+    
   }
   
   
 }
 
 void voronoi() {
+  vorpoints = new float[ncells][2];
   for(int i = 0;i<ncells;i++) {
     Cell c = cells.get(i);
     vorpoints[i][0] = c.position.x;
@@ -69,6 +79,7 @@ void voronoi() {
       line( startX, startY, endX, endY );
     }
   } else {
+    
     MPolygon[] myRegions = vor.getRegions();
     strokeWeight(5);
     for(int i=0; i<myRegions.length; i++)
